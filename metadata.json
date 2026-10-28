@@ -1,0 +1,6 @@
+{
+  "name": "University of Benin Study Notes",
+  "description": "Official mobile-friendly academic portal for UNIBEN students and lecturers to access, search, and listen to lecture notes in PDF format.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

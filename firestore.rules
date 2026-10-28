@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'overdarknessdominion@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidNote(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.courseTitle is string && data.courseTitle.size() >= 2 && data.courseTitle.size() <= 200
+        && data.topic is string && data.topic.size() >= 2 && data.topic.size() <= 300
+        && data.lecturer is string && data.lecturer.size() >= 2 && data.lecturer.size() <= 150
+        && data.level in ['Level 100', 'Level 200', 'Level 300']
+        && data.faculty in [
+          'Faculty of Engineering and Technology',
+          'Faculty of Health and Biomedical Science',
+          'Faculty of Agriculture',
+          'Faculty of Business and Management Sciences',
+          'Faculty of Education',
+          'Faculty of Home Economics and Social Works'
+        ]
+        && data.fileUrl is string && data.fileUrl.size() <= 2000
+        && data.fileName is string && data.fileName.size() <= 255
+        && data.fileSize is number
+        && data.isPublished is bool
+        && data.uploadDate is string
+        && data.lastUpdated is string;
+    }
+
+    // Notes collection
+    match /notes/{noteId} {
+      // Students do NOT need a password or login to browse and open published notes
+      allow get: if resource.data.isPublished == true || isAdmin();
+      allow list: if resource.data.isPublished == true || isAdmin();
+
+      // Only authenticated administrators can upload, edit, toggle publication, or delete notes
+      allow create: if isAdmin() && isValidId(noteId) && isValidNote(incoming());
+      allow update: if isAdmin() && isValidNote(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Admins collection
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() || (isSignedIn() && request.auth.token.email == 'overdarknessdominion@gmail.com');
+      allow delete: if isAdmin() && request.auth.token.email != 'overdarknessdominion@gmail.com';
+    }
+  }
+}

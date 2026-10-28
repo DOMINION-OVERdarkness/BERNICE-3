@@ -1,0 +1,139 @@
+{
+  "entities": {
+    "StudyNote": {
+      "title": "StudyNote",
+      "description": "Educational course lecture note in PDF format uploaded for University of Benin students",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique note identifier",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "courseTitle": {
+          "type": "string",
+          "description": "Course title and code (e.g. ENG 101: Engineering Mathematics)",
+          "maxLength": 200,
+          "minLength": 2
+        },
+        "topic": {
+          "type": "string",
+          "description": "Specific lecture topic covered in the PDF document",
+          "maxLength": 300,
+          "minLength": 2
+        },
+        "lecturer": {
+          "type": "string",
+          "description": "Name of lecturer who prepared the notes",
+          "maxLength": 150,
+          "minLength": 2
+        },
+        "level": {
+          "type": "string",
+          "enum": ["Level 100", "Level 200", "Level 300"],
+          "description": "Undergraduate student academic level"
+        },
+        "faculty": {
+          "type": "string",
+          "enum": [
+            "Faculty of Engineering and Technology",
+            "Faculty of Health and Biomedical Science",
+            "Faculty of Agriculture",
+            "Faculty of Business and Management Sciences",
+            "Faculty of Education",
+            "Faculty of Home Economics and Social Works"
+          ],
+          "description": "University faculty"
+        },
+        "fileUrl": {
+          "type": "string",
+          "description": "URL to the original PDF file stored in Firebase Storage or backend storage",
+          "maxLength": 2000
+        },
+        "fileName": {
+          "type": "string",
+          "description": "Original PDF document filename",
+          "maxLength": 255
+        },
+        "fileSize": {
+          "type": "number",
+          "description": "Size in bytes"
+        },
+        "pageCount": {
+          "type": "number",
+          "description": "Total number of pages"
+        },
+        "isPublished": {
+          "type": "boolean",
+          "description": "Whether note is published and visible to students"
+        },
+        "uploadDate": {
+          "type": "string",
+          "description": "Upload date timestamp"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "description": "Last updated timestamp"
+        },
+        "ocrText": {
+          "type": "string",
+          "description": "Extracted OCR text for voice reading",
+          "maxLength": 1000000
+        },
+        "authorId": {
+          "type": "string",
+          "description": "UID of the admin who uploaded this note"
+        },
+        "authorEmail": {
+          "type": "string",
+          "description": "Email of the admin"
+        }
+      },
+      "required": [
+        "id",
+        "courseTitle",
+        "topic",
+        "lecturer",
+        "level",
+        "faculty",
+        "fileUrl",
+        "fileName",
+        "fileSize",
+        "isPublished",
+        "uploadDate",
+        "lastUpdated"
+      ]
+    },
+    "AdminProfile": {
+      "title": "AdminProfile",
+      "description": "Authorized administrator / lecturer record",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Admin email address"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"],
+          "description": "Role level"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of profile creation"
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/notes/{noteId}": {
+      "schema": "StudyNote",
+      "description": "Collection of university lecture notes"
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminProfile",
+      "description": "Authorized administrators with elevated write privileges"
+    }
+  }
+}
